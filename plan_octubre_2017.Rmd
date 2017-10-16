@@ -1,0 +1,45 @@
+---
+title: "crap_doc_2"
+author: "Ricardo Mayer"
+date: "October 16, 2017"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+## Próximos pasos
+
+1.  Cerrar el menú de métodos:
+    - Métodos que entendemos, nos parecen factibles y útiles al final de Octubre
+    - Métodos que aún nos falta entender o determinar su factibilidad al final de Octubre, pero nos parecen prometedores : quedan en segundo plano por el momento
+    - Métodos descartados, especificar razón.
+   con aquellos que estén mejor entendidos 
+   
+2.  Implementación y testing de los métodos
+    - Datos
+        - Alistar la base del balance 2017 para ser usada por múltiples métodos
+        - Separación data preprocessing de la estimación (desestacionalización,
+   trasformación de mensual a trimestral, etc.). Formato canónico para nuestros ejercicios.
+
+    - Implementación: 
+        - Revisión de implementaciones existentes: cuales softwares y algoritmos estan disponibles.
+            - Pueden converger a un software común?
+        - Cuan difícil/lento es tratar cada país como una especificación distinta?   
+        
+    - Testing
+        - Métricas para evaluar los modelos. 
+        - Testear combinaciones de modelos.
+        - Compararlos usando bases 2017, 2016 y 2015
+        - Cómo reportar los resultados
+        
+3. Time table:
+    - Selección de métodos a comparar, 31 de Octubre
+    - Noviembre y Diciembre, implementación y dejarlos listos para comparaciones
+    - Enero y Febrero: testing and ranking
+    - Marzo y Abril, revisión, discusión, iteración
+    - Producir nuevos insumos, junto al tradicional, para las proyecciones del Estudio 2018
+    
+     
+     
+     
