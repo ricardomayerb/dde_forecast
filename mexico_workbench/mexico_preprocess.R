@@ -19,6 +19,7 @@ library(xts)
 mex_q  <- read_excel("data_pablo/Mexico.xlsx", sheet = "quarterly")
 
 
+
 # domestic variables
 dom_names <- c("dom_Brasil", "retail", "vta_bs_k", "tcr", "ibc", "ip", 
                "ip_mining", "ip_manufacturing", "ip_capital_goods",
