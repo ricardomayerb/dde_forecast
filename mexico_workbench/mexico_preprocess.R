@@ -17,6 +17,7 @@ library(xts)
 # mex_m <- read_excel("Brasil.xlsx", sheet = "monthly")
 
 mex_q  <- read_excel("data_pablo/Mexico.xlsx", sheet = "quarterly")
+mex_m  <- read_excel("data_pablo/Mexico.xlsx", sheet = "monthly")
 
 
 
