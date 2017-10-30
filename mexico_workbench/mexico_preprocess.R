@@ -19,30 +19,73 @@ library(xts)
 mex_q  <- read_excel("data_pablo/Mexico.xlsx", sheet = "quarterly")
 mex_m  <- read_excel("data_pablo/Mexico.xlsx", sheet = "monthly")
 
+quarterly_names <- names(mex_q)
+monthly_names <- names(mex_q)
+
+mex_q_xts <- tk_xts(mex_q, date_var = date)
+nominal_dates_q <- tibble(name = "q_nominal",
+                     start = min(index(mex_q_xts)),
+                     end = max(index(mex_q_xts)))
+
+mex_q_xts_comcas <- mex_q_xts[complete.cases(mex_q_xts), ]
+comcases_dates_q <- tibble(name = "q_com_cases",
+                      start = min(index(mex_q_xts_comcas)),
+                     end = max(index(mex_q_xts_comcas)))
 
 
-# domestic variables
-dom_names <- c("dom_Brasil", "retail", "vta_bs_k", "tcr", "ibc", "ip", 
-               "ip_mining", "ip_manufacturing", "ip_capital_goods",
-               "ip_intermediate_goods", "ip_consumer_goods", "ip_dura",
-               "ip_nodura", "conf_cons", "conf_emp", "tot", "exp",
-               "exp_primary", "imp", "imp_consumer", "imp_intermediate",
-               "imp_capital", "tax", "cred", "conf_ibre")
 
-ext_names <- c("ip_us", "ip_ue", "act_chn")
+mex_m_xts <- tk_xts(mex_m, date_var = date)
+nominal_dates_m <- tibble(name = "m_nominal",
+                     start = min(index(mex_m_xts)),
+                     end = max(index(mex_m_xts)))
 
-depvar_name <-  "rgdp"
+mex_m_xts_comcas <- mex_m_xts[complete.cases(mex_m_xts), ]
+comcases_dates_m <- tibble(name = "m_com_cases",
+                      start = min(index(mex_m_xts_comcas)),
+                      end = max(index(mex_m_xts_comcas)))
 
-bra_q_xts <- tk_xts(bra_q, date_var = date)
+mex_m_xts_to_q <- apply.quarterly(mex_m_xts, mean)
 
-bra_m_xts <- tk_xts(bra_m, date_var = date)
+mex_xts <- merge.xts(mex_q_xts, mex_m_xts_to_q)
+nominal_dates_merged <- tibble(name = "merged_nominal",
+                          start = min(index(mex_xts)),
+                     end = max(index(mex_xts)))
 
-bra_m_xts_to_q <- apply.quarterly(bra_m_xts, mean)
+mex_xts_comcas <- mex_xts[complete.cases(mex_xts), ]
+comcases_dates_merged <- tibble(name = "merged_com_cases",
+                           start = min(index(mex_xts_comcas)),
+                      end = max(index(mex_xts_comcas)))
 
-bra_xts <- merge.xts(bra_q_xts, bra_m_xts_to_q)
 
-df_start_date <- min(index(bra_xts))
-df_end_date <- max(index(bra_xts))
+start_end_dates <- rbind(nominal_dates_q, comcases_dates_q,
+                         nominal_dates_m, comcases_dates_m,
+                         nominal_dates_merged, comcases_dates_merged)
+
+regvar_name <-  "ibc"
+
+depvar <-  tk_ts(bra_xts[, depvar_name],
+                 start = c(year(df_start_date), quarter(df_start_date)),
+                 frequency = 4)
+
+regvar <-  tk_ts(bra_xts[, regvar_name],
+                 start = c(year(df_start_date), quarter(df_start_date)),
+                 frequency = 4)
+
+
+
+
+# # domestic variables
+# dom_names <- c("dom_Brasil", "retail", "vta_bs_k", "tcr", "ibc", "ip", 
+#                "ip_mining", "ip_manufacturing", "ip_capital_goods",
+#                "ip_intermediate_goods", "ip_consumer_goods", "ip_dura",
+#                "ip_nodura", "conf_cons", "conf_emp", "tot", "exp",
+#                "exp_primary", "imp", "imp_consumer", "imp_intermediate",
+#                "imp_capital", "tax", "cred", "conf_ibre")
+# 
+# ext_names <- c("ip_us", "ip_ue", "act_chn")
+# 
+# depvar_name <-  "rgdp"
+
 
 regvar_name <-  "ibc"
 
