@@ -1,0 +1,88 @@
+---
+title: "Using Mexico as VAR lab"
+author: "Ricardo Mayer"
+date: "October 31, 2017"
+output: html_document
+---
+
+## Preliminaries
+Load all library we will use later, and define any global preferences for this document:
+
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, warning=FALSE, message=FALSE}
+library(seasonal)
+library(forecast)
+library(readxl)
+library(tidyr)
+library(dplyr)
+library(timekit)
+library(lubridate)
+library(ggplot2)
+library(stringr)
+library(tseries)
+library(xts)
+library(vars)
+```
+
+
+
+
+## Data import, description and preparation
+
+The initial data is the same currently used by the *Bridge SARIMAX* model (which, out of respect, I will not call it the *BS Model*, but rather the *BRISA* model)
+
+### Data import
+In this case, data import is easy because all the heavy work was done by Pablo and quarterly and monthly variables have been nicely saved in a workbook (every country has its own workbook) contaning, among other things, one sheet with quarterly series and another one for monthly series.
+
+Let's take the workbook with data for Mexico and import the two sheets we want
+
+```{r}
+mex_q  <- read_excel("data_pablo/Mexico.xlsx", sheet = "quarterly")
+mex_m  <- read_excel("data_pablo/Mexico.xlsx", sheet = "monthly")
+```
+
+That's it. You can inspect these two data frames (actually, tibbles) by clicking on them or executing `View(mex_q)` in the console
+
+### Data description and exploration
+It's useful to have a *ts*-class version to interact with many time-series oriented libraries (forecast, vars, etc) and also an xts version to use data manipulation facilities from xts library.
+
+```{r}
+# start and end dates found in the worksheet will come handy
+# from tibble to xts
+mex_q_xts <- tk_xts(mex_q, date_var = date)
+mex_m_xts <- tk_xts(mex_m, date_var = date)
+
+# from xts to ts
+mex_q_ts <- tk_ts(mex_q_xts,
+                 start = c(year(min(index(mex_q_xts))), 
+                           quarter(min(index(mex_q_xts)))),
+                 frequency = 4)
+
+mex_m_ts <- tk_ts(mex_m_xts,
+                 start = c(year(min(index(mex_m_xts))), 
+                           quarter(min(index(mex_m_xts)))),
+                 frequency = 4)
+#store min and max dates
+nominal_dates_q <- tibble(name = "q_from_excel",
+                     start = min(index(mex_q_xts)),
+                     end = max(index(mex_q_xts)))
+
+nominal_dates_m <- tibble(name = "m_from_exel",
+                     start = min(index(mex_q_xts)),
+                     end = max(index(mex_q_xts)))
+
+```
+
+#### Transform monthly variables into quarterly averages
+
+Since monthly variable are flow variables and not stock, makes more sense to take quarterly averages rather than taking the last monthly value in each quarter, which would be appropriate for stock variables (such as debt)
+
+
+
+
+
