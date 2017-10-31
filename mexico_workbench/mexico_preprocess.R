@@ -57,7 +57,7 @@ comcases_dates_merged <- tibble(name = "merged_com_cases",
                            start = min(index(mex_xts_comcas)),
                       end = max(index(mex_xts_comcas)))
 
-mex_xts_rgdp_comcas <-  mex_xts[is.na(mex_xts$rgdp), ]
+mex_xts_rgdp_comcas <-  mex_xts[!is.na(mex_xts$rgdp), ]
 rgdp_comcases_date <- tibble(name = "rgdp_com_cases",
        start = min(index(mex_xts_rgdp_comcas)),
        end = max(index(mex_xts_rgdp_comcas)))
@@ -68,20 +68,6 @@ start_end_dates <- rbind(nominal_dates_q, comcases_dates_q,
                          nominal_dates_merged, comcases_dates_merged,
                          rgdp_comcases_date)
 
-
-
-regvar_name <-  "ibc"
-
-depvar <-  tk_ts(bra_xts[, depvar_name],
-                 start = c(year(df_start_date), quarter(df_start_date)),
-                 frequency = 4)
-
-regvar <-  tk_ts(bra_xts[, regvar_name],
-                 start = c(year(df_start_date), quarter(df_start_date)),
-                 frequency = 4)
-
-
-
 depvar_sarimax_name <-  c("rgdp")
 
 indva_sarimax_name <-  c("igae", "retail", "ip", "ip_mineral", "ip_energy", "ip_construction", 
@@ -91,12 +77,23 @@ indva_sarimax_name <-  c("igae", "retail", "ip", "ip_mineral", "ip_energy", "ip_
 
 dep_ind_sarimax_name <- c(depvar_sarimax_name, indva_sarimax_name)
 
-endo_variables <-  tk_ts(mex_xts[, dep_ind_sarimax_name],
-                 start = c(year(nominal_dates_merged[[2]]), 
-                           quarter(nominal_dates_merged[[2]])),
+endo_variables <-  tk_ts(mex_xts_rgdp_comcas[, dep_ind_sarimax_name],
+                 start = c(year(rgdp_comcases_date[[2]]), 
+                           quarter(rgdp_comcases_date[[2]])),
                  frequency = 4)
 
-VARselect(endo_variables, lag.max = 8, type = "both")
+adf_t <- ur.df(endo_variables[, "rgdp"], type = "trend", lags = 8, 
+               selectlags = "AIC")
+
+adf_ts <- summary(adf_t)
+
+
+adf_d <- ur.df(endo_variables[, "rgdp"], type = "drift", 
+                        lags = 8, selectlags = "AIC")
+
+adf_ds <- summary(adf_d)
+
+# VARselect(endo_variables, lag.max = 8, type = "both")
 
 
 
