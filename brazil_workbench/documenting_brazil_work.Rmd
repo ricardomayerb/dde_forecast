@@ -103,9 +103,9 @@ bra_m_to_q <- bra_m_tbt %>%
     mutate_fun =  apply.quarterly,
     FUN = mean,
     na.rm = TRUE
-    )
-
-
+    ) %>% 
+  as_tbl_time(index = date)
+  
 
 ```
 
