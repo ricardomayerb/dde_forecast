@@ -1,5 +1,5 @@
 ---
-title: "Using Mexico as VAR lab"
+title: "Using Brasil as VAR lab"
 author: "Ricardo Mayer"
 date: "October 31, 2017"
 output: html_document
@@ -29,6 +29,7 @@ library(tseries)
 library(xts)
 library(tibble)
 library(tibbletime)
+library(tidyquant)
 ```
 
 
@@ -39,11 +40,11 @@ The initial data is the same currently used by the *Bridge SARIMAX* model (which
 ### Data import
 In this case, data import is easy because all the heavy work was done by Pablo and quarterly and monthly variables have been nicely saved in a workbook (every country has its own workbook) contaning, among other things, one sheet with quarterly series and another one for monthly series.
 
-Let's take the workbook with data for Mexico and import the two sheets we want
+Let's take the workbook with data for Brazil and import the two sheets we want
 
 ```{r}
-mex_q  <- read_excel("data_pablo/Mexico.xlsx", sheet = "quarterly")
-mex_m  <- read_excel("data_pablo/Mexico.xlsx", sheet = "monthly")
+bra_q  <- read_excel("data_pablo/Brasil.xlsx", sheet = "quarterly")
+bra_m  <- read_excel("data_pablo/Brasil.xlsx", sheet = "monthly")
 ```
 
 That's it. You can inspect these two data frames (actually, tibbles) by clicking on them or executing `View(mex_q)` in the console
@@ -58,29 +59,30 @@ There are several formats appropiate  for our data:
 # start and end dates found in the worksheet will come handy
 # from tibble to xts
 
-mex_q_tbt <- as_tbl_time(mex_q, index = date)
+bra_q_tbt <- as_tbl_time(bra_q, index = date)
+bra_m_tbt <- as_tbl_time(bra_m, index = date)
 
-mex_q_xts <- tk_xts(mex_q, date_var = date)
-mex_m_xts <- tk_xts(mex_m, date_var = date)
+bra_q_xts <- tk_xts(bra_q, date_var = date)
+bra_m_xts <- tk_xts(bra_m, date_var = date)
 
 # from xts to ts
-mex_q_ts <- tk_ts(mex_q_xts,
-                 start = c(year(min(index(mex_q_xts))), 
-                           quarter(min(index(mex_q_xts)))),
+bra_q_ts <- tk_ts(bra_q_xts,
+                 start = c(year(min(index(bra_q_xts))), 
+                           quarter(min(index(bra_q_xts)))),
                  frequency = 4)
 
-mex_m_ts <- tk_ts(mex_m_xts,
-                 start = c(year(min(index(mex_m_xts))), 
-                           quarter(min(index(mex_m_xts)))),
+bra_m_ts <- tk_ts(bra_m_xts,
+                 start = c(year(min(index(bra_m_xts))), 
+                           quarter(min(index(bra_m_xts)))),
                  frequency = 4)
 #store min and max dates
 nominal_dates_q <- tibble(name = "q_from_excel",
-                     start = min(index(mex_q_xts)),
-                     end = max(index(mex_q_xts)))
+                     start = min(index(bra_q_xts)),
+                     end = max(index(bra_q_xts)))
 
 nominal_dates_m <- tibble(name = "m_from_exel",
-                     start = min(index(mex_q_xts)),
-                     end = max(index(mex_q_xts)))
+                     start = min(index(bra_q_xts)),
+                     end = max(index(bra_q_xts)))
 
 ```
 
@@ -88,6 +90,24 @@ nominal_dates_m <- tibble(name = "m_from_exel",
 
 Since monthly variable are flow variables and not stock, makes more sense to take quarterly averages rather than taking the last monthly value in each quarter, which would be appropriate for stock variables (such as debt)
 
+```{r}
+# using xts to convert and then merge
+bra_m_xts_to_q <- apply.quarterly(bra_m_xts, mean)
+bra_xts <- merge.xts(bra_q_xts, bra_m_xts_to_q)
+
+# using tibbletime to convert and then merge
+rolling_mean_na <- rollify(~mean(.x, na.rm = TRUE), window = 3)
+
+bra_m_to_q <- bra_m_tbt %>% 
+  tq_transmute(
+    mutate_fun =  apply.quarterly,
+    FUN = mean,
+    na.rm = TRUE
+    )
+
+
+
+```
 
 
 
