@@ -30,6 +30,7 @@ library(xts)
 library(tibble)
 library(tibbletime)
 library(tidyquant)
+library(writexl)
 ```
 
 
@@ -145,8 +146,15 @@ rgdp_dates <- c(min(index(bra_xts_sd[comp_rgdp_sd,])),
                 max(index(bra_xts_sd[comp_rgdp_sd,]))
 )
 
-bra_xts_sd_gdp_comp <- bra_xts_sd[comp_rgdp_sd, ]
-bra_tbl_sd_gdp_comp <- bra_tbl_sd[comp_rgdp_sd, ]
+bra_xts_sd_gdp_comp <- bra_xts_sd[comp_rgdp_sd, 5:43 ] 
+bra_tbl_sd_gdp_comp <- bra_tbl_sd %>% 
+  filter(comp_rgdp_sd) %>% 
+  select(- one_of(
+    "year.x", "year.y", "quarter", "hlookup.x", "hlookup.y", "trim") 
+    )
+
+# export to excel
+write_xlsx(bra_xts_sd_gdp_comp, path = "brazil_seasonallly_differenced_data")
 ```
 
 
