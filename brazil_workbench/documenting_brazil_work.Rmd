@@ -95,6 +95,15 @@ Since monthly variable are flow variables and not stock, makes more sense to tak
 bra_m_xts_to_q <- apply.quarterly(bra_m_xts, mean)
 bra_xts <- merge.xts(bra_q_xts, bra_m_xts_to_q)
 
+shortgdp <- bra_xts['2000/2010'  ,"rgdp"]
+
+# trydiff <- shortgdp %>% 
+#   tq_mutate(
+#     mutate_fun = diff.xts,
+#     lag = 4
+#   )
+
+
 # using tibbletime to convert and then merge
 rolling_mean_na <- rollify(~mean(.x, na.rm = TRUE), window = 3)
 
@@ -105,10 +114,40 @@ bra_m_to_q <- bra_m_tbt %>%
     na.rm = TRUE
     ) %>% 
   as_tbl_time(index = date)
-  
+
+bra_tbl <- left_join(bra_q_tbt, bra_m_to_q , by = "date")  
 
 ```
 
+Now, lets take seasonal differences of all variables
+
+```{r}
+bra_xts_sd <- diff.xts(bra_xts, lag  = 4)
+
+bra_tbl_sd <- bra_tbl %>% 
+  tq_transmute(
+    mutate_fun = diff.xts,
+    lag = 4
+  )
+
+
+bra_tbl_sd_rgdp <- bra_tbl %>% 
+  select(date, rgdp) %>% 
+  time_filter(2005 ~ 2010) %>% 
+  tq_mutate(
+    mutate_fun = diff.xts,
+    lag = 4
+  )
+
+comp_rgdp_sd <- !is.na(bra_xts_sd[,"rgdp"])
+
+rgdp_dates <- c(min(index(bra_xts_sd[comp_rgdp_sd,])),
+                max(index(bra_xts_sd[comp_rgdp_sd,]))
+)
+
+bra_xts_sd_gdp_comp <- bra_xts_sd[comp_rgdp_sd, ]
+bra_tbl_sd_gdp_comp <- bra_tbl_sd[comp_rgdp_sd, ]
+```
 
 
 
