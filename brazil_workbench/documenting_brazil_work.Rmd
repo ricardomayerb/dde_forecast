@@ -118,6 +118,8 @@ bra_m_to_q <- bra_m_tbt %>%
 
 bra_tbl <- left_join(bra_q_tbt, bra_m_to_q , by = "date")  
 
+bra_ts <- tk_ts(bra_xts, start = 1990, frequency = 4) 
+
 ```
 
 #### Seasonal differencig
@@ -189,6 +191,9 @@ bra_tbl_yoy_qgr <- bra_tbl %>%
   filter(!is.na(rgdp_gr))
   
 
+bra_xts_yoy_qgr <- tk_xts(bra_tbl_yoy_qgr, date_var = date)
+
+
 bra_tbl_sd_rgdp4 <- bra_tbl %>% 
   select(date, rgdp, ri) %>% 
   time_filter(2005 ~ 2010) %>% 
@@ -211,6 +216,31 @@ TBD
 
 
 ### Time series properties of our variables
+```{r}
+
+myvar <- "rgdp"
+myvar_gr <- "rgdp_gr"
+
+moo <-   auto.arima(bra_ts[, myvar])
+
+nsdiffs(bra_ts[, myvar], test = "ocsb")
+nsdiffs(log(bra_ts[, myvar]), test = "ocsb")
+# nsdiffs(bra_ts[, myvar], test = "ch")
+# nsdiffs(log(bra_ts[, myvar]), test = "ch")
+
+ndiffs(bra_ts[, myvar], test = "kpss")
+ndiffs(log(bra_ts[, myvar]), test = "kpss")
+ndiffs(bra_ts[, myvar], test = "adf")
+ndiffs(log(bra_ts[, myvar]), test = "adf")
+ndiffs(bra_ts[, myvar], test = "pp")
+ndiffs(log(bra_ts[, myvar]), test = "pp")
+
+
+```
+
+
+
+
 
 
 
