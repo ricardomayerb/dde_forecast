@@ -120,6 +120,8 @@ bra_tbl <- left_join(bra_q_tbt, bra_m_to_q , by = "date")
 
 ```
 
+#### Seasonal differencig
+
 Now, lets take seasonal differences of all variables
 
 ```{r}
@@ -147,6 +149,7 @@ rgdp_dates <- c(min(index(bra_xts_sd[comp_rgdp_sd,])),
 )
 
 bra_xts_sd_gdp_comp <- bra_xts_sd[comp_rgdp_sd, 5:43 ] 
+
 bra_tbl_sd_gdp_comp <- bra_tbl_sd %>% 
   filter(comp_rgdp_sd) %>% 
   select(- one_of(
@@ -154,8 +157,19 @@ bra_tbl_sd_gdp_comp <- bra_tbl_sd %>%
     )
 
 # export to excel
-write_xlsx(bra_xts_sd_gdp_comp, path = "brazil_seasonallly_differenced_data")
+write_xlsx(bra_tbl_sd_gdp_comp, 
+           path = "brazil_seasonally_differenced_data.xlsx")
+
+write_xlsx(bra_tbl, 
+           path = "brazil_leves_quarterly_and_formerly_monthly_variables.xlsx")
 ```
+
+#### Accounting for missing values and different timespans
+
+TBD
+
+
+### Time series properties of our variables
 
 
 
