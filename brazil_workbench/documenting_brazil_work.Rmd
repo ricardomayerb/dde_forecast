@@ -118,6 +118,8 @@ bra_m_to_q <- bra_m_tbt %>%
 
 bra_tbl <- left_join(bra_q_tbt, bra_m_to_q , by = "date")  
 
+bra_ts <- tk_ts(bra_xts, start = 1990, frequency = 4) 
+
 ```
 
 #### Seasonal differencig
@@ -134,14 +136,40 @@ bra_tbl_sd <- bra_tbl %>%
   )
 
 
-bra_tbl_sd_rgdp <- bra_tbl %>% 
-  select(date, rgdp) %>% 
-  time_filter(2005 ~ 2010) %>% 
-  tq_mutate(
-    mutate_fun = diff.xts,
-    lag = 4
-  )
+grate <- rollify(function(x) {x/lag.xts(x, k=4) - 1} , window = 6)
 
+bra_tbl_sd_rgdp <- bra_tbl %>% 
+  select(date, rgdp, ri) %>% 
+  time_filter(2005 ~ 2010) %>% 
+  mutate(
+     foo = rgdp/lag.xts(rgdp, k=4) - 1,
+     goo = ri/lag.xts(ri, k=4) - 1
+  ) 
+
+bra_tbl_sd_rgdp2 <- bra_tbl %>% 
+  select(date, rgdp, ri) %>% 
+  time_filter(2005 ~ 2010) %>% 
+  mutate_at( vars(rgdp:ri) , function(x) {x/dplyr::lag(x, n=4) - 1})
+   
+
+bra_tbl_sd_rgdp3 <- bra_tbl %>% 
+  select(date, rgdp, ri) %>% 
+  time_filter(2005 ~ 2010) %>% 
+  mutate_at( vars(rgdp:ri) , funs(gr = ./dplyr::lag(., n=4) - 1)
+             )
+
+bra_tbl_sd_rgdp4 <- bra_tbl %>% 
+  select(date, rgdp, ri) %>% 
+  time_filter(2005 ~ 2010) %>% 
+  mutate_at( vars(-date) , funs(gr = ./dplyr::lag(., n=4) - 1)
+             )
+
+bra_tbl_sd_rgdp5 <- bra_tbl %>% 
+  select(date, rgdp, ri) %>% 
+  time_filter(2005 ~ 2010) %>% 
+  transmute_at( vars(-date) , funs(gr = ./dplyr::lag(., n=4) - 1)
+             )
+   
 comp_rgdp_sd <- !is.na(bra_xts_sd[,"rgdp"])
 
 rgdp_dates <- c(min(index(bra_xts_sd[comp_rgdp_sd,])),
@@ -150,11 +178,29 @@ rgdp_dates <- c(min(index(bra_xts_sd[comp_rgdp_sd,])),
 
 bra_xts_sd_gdp_comp <- bra_xts_sd[comp_rgdp_sd, 5:43 ] 
 
+vars_to_drop = c("year.x", "year.y", "quarter", "hlookup.x",
+                 "hlookup.y", "trim", "month")
+
 bra_tbl_sd_gdp_comp <- bra_tbl_sd %>% 
   filter(comp_rgdp_sd) %>% 
-  select(- one_of(
-    "year.x", "year.y", "quarter", "hlookup.x", "hlookup.y", "trim") 
-    )
+  select(- one_of(vars_to_drop))
+
+bra_tbl_yoy_qgr <- bra_tbl %>%
+  select( - one_of(vars_to_drop)) %>% 
+  mutate_at( vars(-date) , funs(gr = ./dplyr::lag(., n = 4) - 1)) %>% 
+  filter(!is.na(rgdp_gr))
+  
+
+bra_xts_yoy_qgr <- tk_xts(bra_tbl_yoy_qgr, date_var = date)
+
+
+bra_tbl_sd_rgdp4 <- bra_tbl %>% 
+  select(date, rgdp, ri) %>% 
+  time_filter(2005 ~ 2010) %>% 
+  mutate_at( vars(-date) , funs(gr = ./dplyr::lag(., n = 4) - 1) ) 
+
+
+
 
 # export to excel
 write_xlsx(bra_tbl_sd_gdp_comp, 
@@ -170,6 +216,31 @@ TBD
 
 
 ### Time series properties of our variables
+```{r}
+
+myvar <- "rgdp"
+myvar_gr <- "rgdp_gr"
+
+moo <-   auto.arima(bra_ts[, myvar])
+
+nsdiffs(bra_ts[, myvar], test = "ocsb")
+nsdiffs(log(bra_ts[, myvar]), test = "ocsb")
+# nsdiffs(bra_ts[, myvar], test = "ch")
+# nsdiffs(log(bra_ts[, myvar]), test = "ch")
+
+ndiffs(bra_ts[, myvar], test = "kpss")
+ndiffs(log(bra_ts[, myvar]), test = "kpss")
+ndiffs(bra_ts[, myvar], test = "adf")
+ndiffs(log(bra_ts[, myvar]), test = "adf")
+ndiffs(bra_ts[, myvar], test = "pp")
+ndiffs(log(bra_ts[, myvar]), test = "pp")
+
+
+```
+
+
+
+
 
 
 
