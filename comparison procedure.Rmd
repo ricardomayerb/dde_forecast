@@ -1,0 +1,39 @@
+---
+title: "sarimax vs var comparison"
+author: "Ricardo Mayer"
+date: "November 30, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Comparing bridge-sarimax and VAR's forecasts
+
+  - Use only the forecasts of real gdp quarterly growth to assess relative accuracy. YoY forecast may be preferable to QoQ, because older data points  have been already subject to revisions. Even if both methods produce forecast for multiple variables, to keep things simple and focused we should stick to our final product, real gdp.
+
+
+  - Use weighted average of 2 or 3 future dates: since our forecast has an horizon of 8 quarters we should have a flexible way to summarize forecast accuracy over the entire horizon, probably a weighted average of the most salient dates: the end of the current year and the end of the next year and give them weights of 2/3 and 1/3. Another posibility is to give some weight to the 4-quarters ahead forecast if we want to report a YoY growth prediction, say (1/2, 1/4, 1/4).
+  
+  - Use scaled measures of accuracy. In the shortest of runs it is enough to scale by 100 or 1/100 one the RMSEs (sarimax or VAR), but it is preferable to have scaled measured built in our scripts. Percentages of the forecasted variable are problematic when forecasting growth rates because can be zero or close to zero. A better alternative is to scale by the MAE of a naive forecast.
+    - One-step ahead forecast:
+      $$ e_{T+1} := y_{T+1} - \hat{y}_{T+1 | T} $$
+      
+    - MAE: the mean is meant to be take on a defied subset (e.g. the test sample or the estimation sample) 
+      $$ mean(|e_t|) $$
+      
+    - Hyndman and Koehler (2006) propose scaling forecast errors by the in-sample MAE. For non-seasonal series:
+      $$ q_j = \frac{e_j}{ \frac{1}{T-1} \sum_{t = 2}^{T} |y_t - y_{t-1}|  } $$
+      
+         for seasonal series:
+      
+      $$ q_j = \frac{e_j}{ \frac{1}{T-m} \sum_{t = 2}^{T} |y_t - y_{t-m}|  } $$
+      
+    
+      
+      
+  
+  
+  
+
