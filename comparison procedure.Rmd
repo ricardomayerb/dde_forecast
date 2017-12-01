@@ -30,6 +30,10 @@ knitr::opts_chunk$set(echo = TRUE)
       
       $$ q_j = \frac{e_j}{ \frac{1}{T-m} \sum_{t = 2}^{T} |y_t - y_{t-m}|  } $$
       
+      This defines a scaled MAE simply as MASE:
+      
+      $$ mean( |q_j| ) $$  
+      
     
       
       
