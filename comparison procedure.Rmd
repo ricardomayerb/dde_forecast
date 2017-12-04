@@ -17,8 +17,11 @@ knitr::opts_chunk$set(echo = TRUE)
   - Use weighted average of 2 or 3 future dates: since our forecast has an horizon of 8 quarters we should have a flexible way to summarize forecast accuracy over the entire horizon, probably a weighted average of the most salient dates: the end of the current year and the end of the next year and give them weights of 2/3 and 1/3. Another posibility is to give some weight to the 4-quarters ahead forecast if we want to report a YoY growth prediction, say (1/2, 1/4, 1/4).
   
   - Use scaled measures of accuracy. In the shortest of runs it is enough to scale by 100 or 1/100 one the RMSEs (sarimax or VAR), but it is preferable to have scaled measured built in our scripts. Percentages of the forecasted variable are problematic when forecasting growth rates because can be zero or close to zero. A better alternative is to scale by the MAE of a naive forecast.
-    - One-step ahead forecast:
-      $$ e_{T+1} := y_{T+1} - \hat{y}_{T+1 | T} $$
+    
+    - forecast errors in the test sample:
+      $$ e_{t} := y_{t} - \hat{y}_{t | N}, \qquad \text{for $t = N+1, \ldots , T$} $$
+      
+    - *h*-step-ahead forecast: $\hat{y}_{N+h|N}$  
       
     - MAE: the mean is meant to be take on a defied subset (e.g. the test sample or the estimation sample) 
       $$ mean(|e_t|) $$
@@ -34,6 +37,16 @@ knitr::opts_chunk$set(echo = TRUE)
       
       $$ mean( |q_j| ) $$  
       
+  - Time-series cross validation:
+    - In simple terms: supose you have 100 observations available. Use 80 to estimate the VAR, suposing that 80 is enough to have a reliable estimation. The remaining 20 are used to evaluate forecast accuracy. It can be used in two forms of cross validation: 
+      - Decide a forecast horizon, say 8 quarters. Being 80 the minimum number of observations for reasonable estimates, it leaves 13 posible 8-step-ahead forecast and forecast error:
+        - Forecast error #1: use 80 obs for estimation and forecast obs number 88. Use actual absebation 88 to compute the first forecast error
+        - Forecast error #2: use 81 obs for estimation and forecast obs number 89. Use actual observation 89 to compute the second forecast error
+        - ...
+        - Forecast error #13: use 92 obs for estimation and forecast obs number 100. Use actual observation 100 to compute the thirdteenth error
+        - Compute whatever summary statistic you want with those 13 errors (MAE, MASE, RMSE, etc.). When computing MASE, it could be a good idea to compute the denominator over the entire sample.
+        
+        
     
       
       
