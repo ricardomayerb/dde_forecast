@@ -8,7 +8,7 @@
 clear all       
 set more off 
 
-cd C:\Users\AKLEIN\Desktop\Econometrics\Data\VarForecasting
+* cd C:\Users\AKLEIN\Desktop\Econometrics\Data\VarForecasting
 
 use brasilQ_yoy, clear
 * tidy the data

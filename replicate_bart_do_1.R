@@ -23,6 +23,13 @@ brasil_ts <- tk_ts(brasil_xts,
                     frequency = 4)
 
 
+foo <- ur.df(brasil_ts[,1], lags = 4)
+foo@cval
+voo <- summary(foo)
+
+voo@cval[voo@cval > -2]
+
+
 # * stationarity tests
 # dfuller rgdp, lags(4)
 # dfuller rpc, lags(4)
