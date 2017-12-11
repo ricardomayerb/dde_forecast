@@ -4,6 +4,7 @@ library(timetk)
 library(lubridate)
 library(xts)
 library(vars)
+library(broom)
 
 # use brasilQ_yoy, clear
 # * tidy the data
