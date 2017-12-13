@@ -38,12 +38,34 @@ brasil_n_ts <- brasil_nested %>%
 
 fun_for <- function(x, h){forecast(auto.arima(x), h=h)}
 
+
+meta_goo <- function(mod, h){
+  function(y,h) {forecast(Arima(y, model = mod), h)}
+}
+
+
+
+
 brasil_auto_all <- brasil_n_ts %>% 
   mutate(auto_arimas = map(data.ts, auto.arima),
          a_forecast = map(auto_arimas, forecast, h = 8),
          a_acu = map(a_forecast, accuracy),
-         e_cv = map(data.ts, tsCV, fun_for, h = 8)
-         )
+         e_cv = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 5)
+  )
+
+
+# e_cv = map(data.ts, tsCV, fun_for, h = 8)
+
+# ffoo = function(x,h) {forecast(Arima(x, model = fa), h=h)}
+# > tsCV(foo, ffoo, h=4)
+
+goo_fa <- meta_goo(fa)
+
+tsCV(foo, goo_fa, h = 5)
+
+tsCV(foo, meta_goo(fa), h = 5)
+
+
 
 # cv = map(data.ts, tsCV, a_forecast
 
