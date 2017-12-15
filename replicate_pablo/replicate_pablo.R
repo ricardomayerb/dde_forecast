@@ -12,6 +12,7 @@ library(dplyr)
 library(tidyquant)
 library(forecast)
 library(readxl)
+library(microbenchmark)
 
 # use brasilQ_yoy, clear
 # * tidy the data
@@ -75,8 +76,25 @@ meta_goo <- function(mod, h){
 #         )
 
 country_arima_fit <- country_n_ts %>%
-  mutate(auto_arimas = map(data.ts, auto.arima)
+  mutate(auto_arimas = map(data.ts, auto.arima),
+         auto_arimas_train = map(train_data.ts, auto.arima),
   )
+
+country_arima_fore <- country_arima_fit %>%
+  mutate(fore_data = map(auto_arimas, forecast, h = 8),
+         fore_train_data = map(auto_arimas_train, forecast, h = 8),
+         fore_accu = map2(fore_train_data, test_data.ts, accuracy)
+  )
+
+
+country_arima_fore <- country_arima_fit %>%
+  mutate(auto_arimas = map(data.ts, auto.arima),
+         fore_data = map(auto_arimas, forecast, h = 8),
+         auto_arimas_train = map(train_data.ts, auto.arima),
+         fore_train_data = map(auto_arimas_train, forecast, h = 8),
+         accu_on_test = map2(auto_arimas_train, test_data.ts, accuracy)
+  )
+
 
 country_arima_eCV <- country_arima_fit %>% 
   mutate(
@@ -104,31 +122,37 @@ country_arima_eCV_w40 <- country_arima_fit %>%
   )
 
 
-mbm <- microbenchmark(
-  "country_arima_eCV" = country_arima_fit %>% 
-    mutate(
-     e_cv_h_1 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 1),
-     e_cv_h_2 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 2),
-     e_cv_h_3 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 3),
-     e_cv_h_4 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 4),
-     e_cv_h_5 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 5),
-     e_cv_h_6 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 6),
-     e_cv_h_7 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 7),
-     e_cv_h_8 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 8)
-                         ),
-  "country_arima_eCV_w40" = country_arima_fit %>% 
-    mutate(
-      e_cv_h_1 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 1, window = 40),
-      e_cv_h_2 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 2, window = 40),
-      e_cv_h_3 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 3, window = 40),
-      e_cv_h_4 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 4, window = 40),
-      e_cv_h_5 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 5, window = 40),
-      e_cv_h_6 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 6, window = 40),
-      e_cv_h_7 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 7, window = 40),
-      e_cv_h_8 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 8, window = 40)
-    ),
-  times = 10
-)
+# mbm <- microbenchmark(
+#   "country_arima_eCV" = country_arima_fit %>% 
+#     mutate(
+#      e_cv_h_1 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 1),
+#      e_cv_h_2 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 2),
+#      e_cv_h_3 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 3),
+#      e_cv_h_4 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 4),
+#      e_cv_h_5 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 5),
+#      e_cv_h_6 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 6),
+#      e_cv_h_7 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 7),
+#      e_cv_h_8 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 8)
+#                          ),
+#   "country_arima_eCV_w40" = country_arima_fit %>% 
+#     mutate(
+#       e_cv_h_1 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 1, window = 40),
+#       e_cv_h_2 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 2, window = 40),
+#       e_cv_h_3 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 3, window = 40),
+#       e_cv_h_4 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 4, window = 40),
+#       e_cv_h_5 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 5, window = 40),
+#       e_cv_h_6 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 6, window = 40),
+#       e_cv_h_7 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 7, window = 40),
+#       e_cv_h_8 = map2(data.ts, map(auto_arimas, meta_goo), tsCV, h = 8, window = 40)
+#     ),
+#   times = 30
+# )
+# 
+# mbm
+# 
+# autoplot(mbm)
+
+
 
 country_arimas_tidy <- country_arima_fit %>% 
   mutate(tidy = map(auto_arimas, sw_tidy)) %>% 
