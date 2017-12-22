@@ -1,0 +1,21 @@
+---
+title: "reunion 2017-12-21"
+author: "Ricardo Mayer"
+date: "December 22, 2017"
+output: html_document
+---
+
+## Tema general: nowcasting
+
+### puntos tratados
+
++ use de leading indicators. Recolectar leading indicators actuales (uruguay + brasil + mexico)
++ reviasr publicacion de leading indicators, puede estar en series de macro para el desarrollo
++ Pablo, el GDPNow con ENI usa muchas encuestas de expectativas 
++ CFNAI es más simple
++ Quiebres estructurales haven deseable q nuestros modelos tengan coeficientes variables. 
++ Revisar si manuelito tiene metodologia con time varying factor loadings.
++ Cuatro ejercicios anuales
++ Próximo paso en VAR es hacer bridge type equations con datos mensuales
++ Primer deadline 
+
